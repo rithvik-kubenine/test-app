@@ -12,8 +12,8 @@ variable "aws_profile" {
 
 variable "name_prefix" {
   type        = string
-  description = "Prefix for VPC and subnet names."
-  default     = "rithvik-task-349"
+  description = "Prefix for VPC, ECS, and IAM resource names (e.g. task-3-49 → cluster task-3-49-cluster, service task-3-49-service)."
+  default     = "task-3-49"
 }
 
 variable "vpc_cidr" {
@@ -42,8 +42,8 @@ variable "container_port" {
 
 variable "github_repository" {
   type        = string
-  description = "GitHub repository allowed to assume the OIDC role (format: owner/repo)."
-  default     = "idli12atkube9/tform"
+  description = "GitHub repository for trust policy sub claim repo:<owner>/<repo>:ref:refs/heads/<branch> (e.g. your-username/your-repo)."
+  default     = "rithvik-kubenine/test-app"
 }
 
 variable "github_branch" {
@@ -56,4 +56,10 @@ variable "github_actions_role_policy_arns" {
   type        = list(string)
   description = "Managed IAM policy ARNs to attach to the GitHub Actions role."
   default     = []
+}
+
+variable "github_actions_attach_ecs_deploy_policy" {
+  type        = bool
+  description = "Attach an inline policy limiting ecs:UpdateService and ecs:DescribeServices to this module's ECS service ARN only."
+  default     = true
 }

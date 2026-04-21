@@ -2,7 +2,7 @@ module "ecs_cluster" {
   source  = "terraform-aws-modules/ecs/aws//modules/cluster"
   version = "~> 5.12"
 
-  cluster_name = "${var.name_prefix}-ecs"
+  cluster_name = "${var.name_prefix}-cluster"
 
   fargate_capacity_providers = {
     FARGATE = {
@@ -13,7 +13,7 @@ module "ecs_cluster" {
   }
 
   tags = {
-    Name = "${var.name_prefix}-ecs"
+    Name = "${var.name_prefix}-cluster"
   }
 }
 
@@ -21,7 +21,7 @@ module "ecs_service" {
   source  = "terraform-aws-modules/ecs/aws//modules/service"
   version = "~> 5.12"
 
-  name        = "${var.name_prefix}-flask"
+  name        = "${var.name_prefix}-service"
   cluster_arn = module.ecs_cluster.arn
 
   cpu    = 256
@@ -76,6 +76,6 @@ module "ecs_service" {
   desired_count = 1
 
   tags = {
-    Name = "${var.name_prefix}-flask"
+    Name = "${var.name_prefix}-service"
   }
 }

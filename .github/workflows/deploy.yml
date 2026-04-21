@@ -1,0 +1,58 @@
+# Required GitHub secrets:
+#   AWS_ACCOUNT_ID          — 12-digit AWS account ID (for OIDC role ARN)
+#   DOCKERHUB_USERNAME      — Docker Hub user or org
+#   DOCKERHUB_TOKEN         — Docker Hub access token (not your account password)
+#
+# Optional: set repository Variables if you prefer not to hardcode image/cluster below.
+
+name: Build, push, and deploy ECS
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-south-1
+      ECS_CLUSTER: task-3-49-cluster
+      ECS_SERVICE: task-3-49-service
+      # Must match the image ECS pulls (see variable.tf container_image / Docker Hub repo)
+      DOCKER_IMAGE: idli12atkube9/test-app:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/task-3-49-github-actions-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}
+
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${ECS_SERVICE}" \
+            --force-new-deployment \
+            --region "${AWS_REGION}"

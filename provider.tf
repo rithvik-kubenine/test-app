@@ -5,7 +5,7 @@ provider "aws" {
   default_tags {
     tags = {
       Project = var.name_prefix
-      Stack   = "task-t349-ecs-flask"
+      Stack   = "task-t349-ecs"
     }
   }
 }
